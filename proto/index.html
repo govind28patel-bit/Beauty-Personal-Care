@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}[hidden]{display:none!important}</style>
+<title>DermaSafe Skin Safety</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&amp;family=Figtree:wght@400;500;600;700&amp;display=swap">
+<link rel="stylesheet" href="app.css">
+
+<div class="stage">
+  <aside class="side" aria-label="Prototype navigation">
+    <div class="brand"><svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true"><rect x="2" y="2" width="36" height="36" rx="12" fill="var(--pri)"></rect><rect x="11" y="11" width="18" height="18" rx="6" fill="none" stroke="var(--pri-ink)" stroke-width="2.4"></rect><circle cx="20" cy="20" r="3" fill="var(--hl)"></circle></svg><b>DermaSafe</b></div>
+    <p>An ingredient safety checker that shows its reasons. Tap through the phone or jump to any screen.</p>
+    <div class="ctl"><span>App appearance</span><div class="segc" id="modeCtl"></div></div>
+    <nav class="idx" id="idx" aria-label="All screens"></nav>
+    <p class="note">Products, brands, doctors, advisors, prices and ratings are illustrative examples for this prototype.</p>
+  </aside>
+  <div class="mobilebar"><label for="jump" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Jump to screen</label><select id="jump"></select></div>
+  <div class="device-wrap"><div class="device"><div class="app" id="app"></div></div></div>
+</div>
+
+<script src="core.js"></script>
+<script src="flow.js"></script>
+<script src="profile.js"></script>
+<script src="care.js"></script>
+<script>boot();</script>
+
+</html>

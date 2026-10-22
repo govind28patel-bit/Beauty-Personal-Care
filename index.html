@@ -1,0 +1,996 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="DermaSafe: a UX case study for an allergy-aware skincare ingredient checker built for Indian skin.">
+<title>DermaSafe Case Study</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;family=Instrument+Sans:wght@400;500;600&amp;family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&amp;family=Figtree:wght@400;500;600&amp;display=swap">
+<style>
+/* Layout: long-form scroll story on DermaSafe's own palette. Every phone is a live screen from the coded prototype; one orchestrated hero, then problem, process, flow explorer, screens and decisions. */
+:root{
+  --f-d:"Lexend","Instrument Sans",system-ui,sans-serif;
+  --f-b:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --rust:#7D210B; --cream:#FFF2E7; --sand:#ECDDCA; --wax:#FEF3C7;
+  --bg:#FBF4EE; --surf:#FFFFFF; --surf2:#F4E8DD; --ink:#22140F; --ink2:#6A554C; --line:#E6D6C9;
+  --accent:var(--rust); --on-accent:#FFF2E7; --ok:#2C6A4D; --ok-bg:#DFEFE5; --warn:#875500; --warn-bg:#FBEBC6;
+  --shadow:0 1px 2px rgba(80,30,15,.06),0 18px 40px -24px rgba(80,30,15,.45);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#150D0A; --surf:#1F1511; --surf2:#2A1D18; --ink:#F6E9DF; --ink2:#BFA89C; --line:#3B2A23;
+  --accent:#F09A7A; --on-accent:#2A100A; --ok:#86CCA5; --ok-bg:#1B3226; --warn:#EDBD63; --warn-bg:#382A10;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 18px 40px -24px rgba(0,0,0,.8); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#150D0A; --surf:#1F1511; --surf2:#2A1D18; --ink:#F6E9DF; --ink2:#BFA89C; --line:#3B2A23;
+  --accent:#F09A7A; --on-accent:#2A100A; --ok:#86CCA5; --ok-bg:#1B3226; --warn:#EDBD63; --warn-bg:#382A10;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 18px 40px -24px rgba(0,0,0,.8); color-scheme:dark}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-b);font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased}
+img{max-width:100%;display:block}
+a{color:var(--accent)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:6px}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+section{padding-block:96px}
+h1,h2,h3{font-family:var(--f-d);margin:0;letter-spacing:-.025em;text-wrap:balance;font-weight:600}
+h2{font-size:clamp(32px,4.6vw,49px);line-height:1.08;max-width:18ch}
+h3{font-size:20px;line-height:1.3;letter-spacing:-.01em}
+p{margin:0}
+.lede{font-size:clamp(18px,1.6vw,20px);line-height:1.6;color:var(--ink2);max-width:62ch}
+.kicker{font:500 15px/1.3 var(--f-b);color:var(--accent);display:flex;gap:10px;align-items:center;margin-bottom:18px}
+.kicker b{font:600 13px/1 var(--f-d);width:30px;height:30px;border-radius:10px;display:grid;place-items:center;background:var(--accent);color:var(--on-accent)}
+.muted{color:var(--ink2)}
+.num{font-variant-numeric:tabular-nums}
+
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:20px;min-height:60px;position:relative}
+.brand{font:700 18px var(--f-d);letter-spacing:-.02em;color:var(--ink);text-decoration:none;display:flex;gap:10px;align-items:center;flex:none}
+.brand i{width:26px;height:26px;border-radius:9px;background:var(--rust);display:grid;place-items:center}
+.brand i::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--wax)}
+.nav{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin-left:auto}
+.nav::-webkit-scrollbar{display:none}
+.nav a{font:500 14px var(--f-b);color:var(--ink2);text-decoration:none;padding:8px 12px;border-radius:999px;white-space:nowrap}
+.nav a.on{background:var(--surf2);color:var(--ink)}
+.progress{position:absolute;left:0;bottom:-1px;height:2px;background:var(--accent);width:0;transition:width .1s linear}
+
+.hero{padding-block:72px 96px;position:relative;overflow:hidden}
+.hero .wrap{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:56px;align-items:center}
+.hero h1{font-size:clamp(46px,7vw,86px);line-height:.98;letter-spacing:-.045em}
+.hero h1 span{display:block;color:var(--accent)}
+.meta{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;margin-top:40px;padding-top:24px;border-top:1px solid var(--line)}
+.meta div{display:flex;flex-direction:column;gap:4px;min-width:0}
+.meta small{font:500 13px var(--f-b);color:var(--ink2)}
+.meta span{font:500 15px/1.4 var(--f-d)}
+.blob{position:absolute;right:-12%;top:-18%;width:62vw;max-width:820px;aspect-ratio:1;border-radius:42% 58% 55% 45%/50% 45% 55% 50%;background:radial-gradient(circle at 40% 40%,var(--wax),var(--sand) 55%,transparent 72%);opacity:.75;z-index:-1;animation:morph 18s ease-in-out infinite}
+@keyframes morph{50%{border-radius:58% 42% 45% 55%/45% 55% 45% 55%;transform:rotate(8deg)}}
+
+/* phone with a live prototype screen inside */
+.phone{position:relative;width:min(330px,100%);aspect-ratio:393/852;border-radius:46px;padding:10px;background:#1B110E;box-shadow:0 40px 80px -36px rgba(60,20,8,.7),inset 0 0 0 1px rgba(255,255,255,.08);margin:0 auto}
+.phone .scr{position:relative;width:100%;height:100%;border-radius:37px;overflow:hidden;background:var(--sand)}
+.phone iframe{position:absolute;left:0;top:0;width:393px;height:852px;border:0;transform-origin:0 0;background:var(--sand)}
+.phone.still iframe{pointer-events:none}
+.hint{font:500 13px var(--f-b);color:var(--ink2);text-align:center;margin-top:12px}
+.cap{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:18px auto 0;width:min(330px,100%);font:500 14px var(--f-b);color:var(--ink2)}
+.dots{display:flex;gap:5px}
+.dots i{width:6px;height:6px;border-radius:3px;background:var(--line);transition:width .3s,background .3s}
+.dots i.on{width:18px;background:var(--accent)}
+
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:56px;align-items:start}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:48px}
+.stat{background:var(--surf);border-radius:24px;padding:26px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px}
+.stat b{font:700 72px/1 var(--f-d);letter-spacing:-.05em;color:var(--accent)}
+.stat p{font-size:15.5px;line-height:1.5;color:var(--ink2)}
+.card{background:var(--surf);border-radius:24px;padding:26px;box-shadow:var(--shadow)}
+.band{background:var(--rust);color:#FFF2E7}
+.band .lede{color:#F1D6C7}
+.band .kicker{color:#FEF3C7}
+.band .kicker b{background:#FEF3C7;color:var(--rust)}
+.figure{border-radius:24px;overflow:hidden;background:var(--surf);box-shadow:var(--shadow)}
+figcaption{font-size:14px;color:var(--ink2);margin-top:12px}
+
+.diamond{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:40px}
+.phase{background:var(--surf);border-radius:20px;padding:20px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:8px;border-top:4px solid var(--accent)}
+.phase small{font:500 13px var(--f-b);color:var(--ink2)}
+.phase h3{font-size:18px}
+.phase p{font-size:15px;line-height:1.5;color:var(--ink2)}
+
+.vpc{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;margin-top:40px}
+.vpc-side{background:var(--surf);border-radius:28px;padding:22px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px}
+.vpc-side>h3{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.vpc-side>h3 small{font:500 13px var(--f-b);color:var(--ink2)}
+.vbox{border-radius:18px;padding:16px 18px;background:var(--surf2)}
+.vbox h4{margin:0 0 8px;font:600 15px var(--f-d)}
+.vbox ul{margin:0;padding-left:18px;font-size:15px;line-height:1.55}
+.vbox li+li{margin-top:4px}
+.vbox.hot{background:var(--wax);color:#3A2410}
+
+.flow{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;margin-top:40px}
+.flow button{border:0;background:rgba(255,242,231,.1);border-radius:16px;padding:14px 10px;cursor:pointer;text-align:left;font:inherit;color:#FFF2E7;display:flex;flex-direction:column;gap:6px;min-height:84px;transition:transform .2s,background .2s}
+.flow button small{font:600 13px var(--f-d);color:#FEF3C7}
+.flow button span{font:500 15px/1.25 var(--f-d)}
+.flow button[aria-selected="true"]{background:#FEF3C7;color:var(--rust);transform:translateY(-4px)}
+.flow button[aria-selected="true"] small{color:var(--rust)}
+.stage{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:48px;margin-top:36px;align-items:center}
+.stage .phone{width:min(280px,100%)}
+.stage-copy{display:flex;flex-direction:column;gap:22px}
+.jtbd{font:500 clamp(20px,2.2vw,26px)/1.35 var(--f-d);letter-spacing:-.015em}
+.jtbd em{font-style:normal;color:#FEF3C7;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px}
+.kpi{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:start;background:rgba(255,242,231,.1);border-radius:20px;padding:18px 20px}
+.kpi .ic{width:44px;height:44px;border-radius:14px;background:var(--wax);color:var(--rust);display:grid;place-items:center}
+.kpi b{font:600 17px/1.3 var(--f-d);display:block;margin-bottom:4px;color:#FFF2E7}
+.kpi p{font-size:15px;color:#F1D6C7;line-height:1.5}
+.north{display:inline-flex;gap:6px;align-items:center;font:600 13px var(--f-b);color:var(--ok);background:var(--ok-bg);padding:4px 10px;border-radius:999px;margin-top:8px}
+.fade-swap{animation:swap .45s cubic-bezier(.2,.8,.2,1)}
+@keyframes swap{from{opacity:0;transform:translateY(10px)}}
+
+.rail{display:flex;gap:22px;overflow-x:auto;scroll-snap-type:x mandatory;padding:24px max(20px,calc((100vw - 1180px)/2 + 20px)) 32px;scrollbar-width:thin}
+.rail figure{flex:none;width:250px;margin:0;scroll-snap-align:start}
+.rail .phone{width:250px;border-radius:36px;padding:8px}
+.rail .phone .scr{border-radius:29px}
+.rail figcaption b{display:block;font:600 15px var(--f-d);color:var(--ink);margin-bottom:2px}
+.rail-ctl{display:flex;gap:8px}
+.rail-ctl button{width:48px;height:48px;border-radius:50%;border:1.5px solid var(--line);background:var(--surf);color:var(--ink);cursor:pointer;display:grid;place-items:center}
+
+.states{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;margin-top:40px}
+.state-card{display:flex;flex-direction:column;gap:14px}
+.state-card .phone{width:min(260px,100%)}
+.seg{display:flex;gap:4px;background:var(--surf2);border-radius:999px;padding:4px;width:fit-content;margin:0 auto}
+.seg button{border:0;background:none;border-radius:999px;min-height:36px;padding:0 14px;font:500 14px var(--f-b);color:var(--ink2);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--surf);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+
+.swatches{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:32px}
+.sw{border-radius:22px;overflow:hidden;box-shadow:var(--shadow);background:var(--surf)}
+.sw i{display:block;height:130px}
+.sw div{padding:14px 16px;display:flex;flex-direction:column;gap:2px}
+.sw b{font:600 15px var(--f-d)}
+.sw span{font-size:14px;color:var(--ink2)}
+.scale{margin-top:40px;display:flex;flex-direction:column;border-top:1px solid var(--line)}
+.scale div{display:grid;grid-template-columns:150px minmax(0,1fr);gap:20px;align-items:baseline;padding:12px 0;border-bottom:1px solid var(--line);overflow:hidden}
+.scale small{font:500 13px var(--f-b);color:var(--ink2)}
+.scale span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+.chips span{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:9px;font:600 14px "Figtree",sans-serif}
+
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:40px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:40px}
+.tcard{background:var(--surf);border-radius:22px;padding:24px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:10px}
+.tcard .ic{width:44px;height:44px;border-radius:14px;background:var(--wax);color:var(--rust);display:grid;place-items:center}
+.tcard p{font-size:15.5px;color:var(--ink2);line-height:1.55}
+.check{list-style:none;padding:0;margin:14px 0 0;display:flex;flex-direction:column;gap:10px}
+.check li{display:flex;gap:12px;align-items:flex-start;font-size:16px;line-height:1.45}
+.check li::before{content:"";flex:none;width:22px;height:22px;border-radius:7px;margin-top:1px;background:var(--ok-bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232C6A4D' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center/14px no-repeat}
+
+.tbl-wrap{overflow-x:auto;margin-top:40px;border-radius:24px;box-shadow:var(--shadow);background:var(--surf)}
+table{width:100%;border-collapse:collapse;min-width:680px}
+th,td{text-align:left;padding:16px 20px;border-top:1px solid var(--line);vertical-align:top;font-size:15.5px;line-height:1.5}
+thead th{border-top:0;font:500 14px var(--f-b);color:var(--ink2)}
+td:first-child{font:600 15px var(--f-d);white-space:nowrap}
+tr.star td{background:var(--wax);color:#3A2410}
+tr.star td:first-child{color:var(--rust)}
+
+.iter{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:40px}
+.iter .tcard h3{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.tag{font:600 12.5px var(--f-b);padding:4px 10px;border-radius:999px;background:var(--ok-bg);color:var(--ok);white-space:nowrap}
+.navdemo{display:flex;flex-direction:column;gap:10px;margin-top:6px}
+.bar{display:flex;align-items:center;border-radius:999px}
+.bar i{display:block}
+.bar.old{height:76px;justify-content:space-around;background:linear-gradient(90deg,#D9A894,#EBBB9F)}
+.bar.old i{width:58px;height:58px;border-radius:50%;background:rgba(255,255,255,.45)}
+.bar.old i.a{background:var(--rust)}
+.bar.new{height:58px;justify-content:space-around;background:var(--surf2);border-radius:16px}
+.bar.new i{font:600 12px var(--f-b);font-style:normal;color:var(--ink2);display:flex;flex-direction:column;align-items:center;gap:3px}
+.bar.new i::before{content:"";width:20px;height:20px;border-radius:6px;border:2px solid currentColor}
+.bar.new i.a{color:var(--accent)}
+
+.tryit{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,400px);gap:56px;align-items:center}
+.tryit .phone{width:min(360px,100%)}
+.btn{display:inline-flex;align-items:center;gap:8px;min-height:52px;padding:0 22px;border-radius:999px;font:600 16px var(--f-b);text-decoration:none;cursor:pointer;border:0}
+.btn.p{background:#FEF3C7;color:var(--rust)}
+.btn.s{background:transparent;color:#FFF2E7;box-shadow:inset 0 0 0 1.5px rgba(255,242,231,.5)}
+.btn.o{background:var(--accent);color:var(--on-accent)}
+.contact{display:flex;flex-wrap:wrap;gap:12px;margin-top:32px}
+.copy{font:500 15px var(--f-b);color:#F1D6C7;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.copy button{border:0;background:rgba(255,242,231,.12);color:#FFF2E7;border-radius:999px;padding:6px 12px;font:500 13px var(--f-b);cursor:pointer}
+
+.rv.pre{opacity:0;transform:translateY(24px)}
+.rv{transition:opacity .7s cubic-bezier(.2,.8,.2,1),transform .7s cubic-bezier(.2,.8,.2,1)}
+@media (prefers-reduced-motion: reduce){*,*::before{animation:none!important;transition:none!important}.rv.pre{opacity:1;transform:none}html{scroll-behavior:auto}}
+
+/* research, opportunity, fit, MoSCoW, rubric */
+.h3x{font-size:clamp(22px,2.4vw,28px);letter-spacing:-.02em;margin-top:72px}
+.sub{font-size:16px;color:var(--ink2);margin-top:8px;max-width:64ch}
+.rstats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:40px}
+.rstat{background:var(--surf);border-radius:24px;padding:24px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:10px}
+.rstat b{font:700 46px/1 var(--f-d);letter-spacing:-.04em;color:var(--accent)}
+.rstat p{font-size:15.5px;line-height:1.5}
+.rstat cite{font:500 13px/1.4 var(--f-b);color:var(--ink2);font-style:normal;margin-top:auto;padding-top:12px;border-top:1px solid var(--line)}
+.quad-wrap{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:28px;margin-top:24px;align-items:start}
+.quad{background:var(--surf);border-radius:24px;box-shadow:var(--shadow);padding:16px}
+.comp{display:grid;gap:12px}
+.comp .tcard{padding:18px 20px;gap:6px}
+.comp .tcard h3{font-size:17px;display:flex;justify-content:space-between;gap:10px}
+.comp .tcard h3 small{font:500 13px var(--f-b);color:var(--ink2)}
+.comp .tcard p b{color:var(--ink);font-weight:600}
+.sources{margin:40px 0 0;font-size:14px;line-height:1.5;color:var(--ink2);padding-left:20px;columns:2;column-gap:40px}
+.sources li{margin-bottom:8px;break-inside:avoid}
+.opp{background:var(--wax);color:#3A2410;border-radius:28px;padding:30px 32px;font:500 clamp(19px,2vw,24px)/1.45 var(--f-d);letter-spacing:-.01em;margin-top:40px;box-shadow:var(--shadow)}
+.opp small{display:block;font:600 13px var(--f-b);color:var(--rust);margin-bottom:10px;letter-spacing:0}
+.hmw{margin-top:20px;font-size:clamp(18px,1.6vw,20px);color:var(--ink2);max-width:70ch}
+.hmw b{color:var(--ink);font-family:var(--f-d);font-weight:600}
+.sizing{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:40px;align-items:center;margin-top:24px}
+.tier{display:grid;grid-template-columns:64px minmax(0,1fr);gap:16px;padding:16px 0;border-bottom:1px solid var(--line)}
+.tier:first-child{border-top:1px solid var(--line)}
+.tier>b{font:700 15px var(--f-d);color:var(--accent);padding-top:4px}
+.tier strong{display:block;font:600 24px/1.2 var(--f-d);letter-spacing:-.02em}
+.tier p{font-size:15px;color:var(--ink2)}
+.streams{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:24px}
+.stream{background:var(--surf);border-radius:22px;padding:20px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:8px}
+.stream .who{font:600 12.5px var(--f-b);background:var(--surf2);border-radius:999px;padding:3px 10px;width:fit-content;color:var(--ink2)}
+.stream h3{font-size:17px}
+.stream p{font-size:14.5px;color:var(--ink2);line-height:1.5}
+.stream .price{margin-top:auto;font:600 15px var(--f-d);color:var(--accent);padding-top:12px;border-top:1px solid var(--line)}
+.never{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;margin-top:14px;padding:14px 18px;border-radius:16px;border:1.5px dashed var(--line);font-size:15px}
+.never b{font:600 14px var(--f-d);color:var(--accent)}
+.never span{text-decoration:line-through;color:var(--ink2)}
+.est{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px;margin-top:24px;background:var(--surf);border-radius:28px;padding:28px;box-shadow:var(--shadow)}
+.rg{display:flex;flex-direction:column;gap:4px;margin-bottom:14px}
+.rg label{display:flex;justify-content:space-between;font-size:15px;gap:12px}
+.rg output{font:600 15px var(--f-d);color:var(--accent);white-space:nowrap}
+.rg input{width:100%;accent-color:var(--rust);min-height:28px;margin:0}
+.est-out{display:flex;flex-direction:column;gap:18px}
+.est-out small{font:500 14px var(--f-b);color:var(--ink2)}
+.est-total{font:700 clamp(42px,5vw,58px)/1 var(--f-d);letter-spacing:-.04em}
+.sbar{display:flex;height:22px;border-radius:999px;overflow:hidden;background:var(--surf2);gap:2px}
+.sbar i{display:block;transition:width .4s cubic-bezier(.2,.8,.2,1)}
+.legend{display:flex;flex-direction:column;gap:10px;font-size:15px}
+.legend div{display:grid;grid-template-columns:12px minmax(0,1fr) auto;gap:10px;align-items:center}
+.legend i{width:12px;height:12px;border-radius:4px}
+.legend b{font:600 15px var(--f-d)}
+.est-note{font-size:15px;line-height:1.5;background:var(--surf2);border-radius:16px;padding:14px 16px}
+.why{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:24px}
+.why .tcard b{font:700 30px/1 var(--f-d);letter-spacing:-.03em;color:var(--accent)}
+.why .tcard cite{font:500 13px var(--f-b);color:var(--ink2);font-style:normal;margin-top:auto}
+.fly-wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px;align-items:center;margin-top:24px}
+.orbit{transform-origin:200px 200px;animation:spin 14s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.phases{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:24px}
+.ph{background:var(--surf);border-radius:22px;padding:22px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:8px;border-left:4px solid var(--accent)}
+.ph small{font:600 13px var(--f-b);color:var(--accent)}
+.ph ul{margin:0;padding-left:18px;font-size:15px;line-height:1.55;color:var(--ink2)}
+.fit{display:flex;flex-direction:column;gap:12px;margin-top:24px}
+.fit-row{display:grid;grid-template-columns:minmax(0,1fr) 40px minmax(0,1fr) minmax(0,.85fr);gap:12px;align-items:stretch}
+.fit-row>div{border-radius:18px;padding:14px 16px;font-size:15px;line-height:1.45}
+.fit-head>div{padding:0 4px!important;font:500 13px var(--f-b);color:var(--ink2)}
+.fit-p{background:var(--surf2)}
+.fit-r{background:var(--wax);color:#3A2410}
+.fit-e{background:var(--surf);box-shadow:var(--shadow);font-size:14px!important;color:var(--ink2)}
+.fit-e b{display:block;color:var(--ink);font:600 13px var(--f-b);margin-bottom:2px}
+.fit-row>.fit-a{display:grid;place-items:center;color:var(--accent);padding:0}
+.verdict{display:inline-flex;gap:8px;align-items:center;font:600 14px var(--f-b);color:var(--ok);background:var(--ok-bg);padding:6px 12px;border-radius:999px;margin-top:16px}
+.moscow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:40px}
+.mcol{background:var(--surf);border-radius:24px;padding:20px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px;border-top:6px solid var(--c)}
+.mcol h3{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.mcol h3 small{font:500 13px var(--f-b);color:var(--ink2)}
+.mcol .mt{font-size:14px;color:var(--ink2);line-height:1.45}
+.mcol ol{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px}
+.mcol li{display:grid;grid-template-columns:24px minmax(0,1fr);gap:10px;font-size:15px;line-height:1.4;align-items:start}
+.mcol li .n{font:600 12px var(--f-d);width:24px;height:24px;border-radius:8px;display:grid;place-items:center;background:var(--surf2);color:var(--ink)}
+.mcol.must li .n{background:var(--rust);color:#FFF2E7}
+.mcol li em{display:block;font-style:normal;font-size:13px;color:var(--ink2);margin-top:3px}
+.mcol.wont li .t{text-decoration:line-through;text-decoration-color:var(--ink2)}
+.inp{display:inline-block;font:600 11px var(--f-b);color:var(--ok);background:var(--ok-bg);border-radius:999px;padding:1px 7px;margin-left:4px;vertical-align:1px;white-space:nowrap;text-decoration:none}
+.rubric{display:flex;flex-direction:column;margin-top:40px;background:var(--surf);border-radius:24px;box-shadow:var(--shadow);overflow:hidden}
+.rubric .grp{font:600 12.5px var(--f-b);letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);padding:22px 24px 10px}
+.rrow{display:grid;grid-template-columns:28px minmax(0,1fr) minmax(0,1.3fr) auto;gap:16px;align-items:center;padding:16px 24px;border-top:1px solid var(--line)}
+.rrow .ok{width:28px;height:28px;border-radius:9px;background:var(--ok-bg);color:var(--ok);display:grid;place-items:center}
+.rrow h3{font-size:16.5px}
+.rrow p{font-size:15px;color:var(--ink2);line-height:1.5}
+.rrow a{font:600 14px var(--f-b);white-space:nowrap;text-decoration:none;padding:8px 14px;border-radius:999px;background:var(--surf2);color:var(--ink)}
+.tool{display:grid;grid-template-columns:28px minmax(0,1fr);gap:16px;padding:22px 24px;border-top:1px solid var(--line);background:var(--surf2)}
+.tool .ok{width:28px;height:28px;border-radius:9px;background:var(--wax);color:var(--rust);display:grid;place-items:center}
+.tool p{font-size:15px;color:var(--ink2);line-height:1.55;margin-top:4px}
+.sys-live{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,320px);gap:48px;align-items:center;margin-top:64px}
+.sys-live .phone{width:min(300px,100%)}
+.inv{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.inv span{font:500 14px var(--f-b);padding:6px 12px;border-radius:999px;background:var(--surf);border:1px solid var(--line)}
+@media (max-width: 920px){
+  .rstats,.streams,.why,.moscow{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .quad-wrap,.sizing,.est,.fly-wrap,.sys-live,.phases{grid-template-columns:1fr}
+  .fit-row{grid-template-columns:1fr;gap:6px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+  .fit-head{display:none}
+  .fit-row>.fit-a{transform:rotate(90deg);height:28px}
+  .sources{columns:1}
+  .rrow{grid-template-columns:28px minmax(0,1fr)}
+  .rrow p,.rrow a{grid-column:2}
+  .rrow a{justify-self:start}
+}
+@media (max-width: 560px){.rstats,.streams,.why,.moscow{grid-template-columns:1fr}.opp{padding:24px}.est{padding:20px}}
+
+@media (max-width: 920px){
+  section{padding-block:72px}
+  .hero .wrap,.split,.stage,.vpc,.tryit{grid-template-columns:1fr}
+  .hero .wrap{gap:40px}
+  .meta{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .stats,.grid3,.states{grid-template-columns:1fr}
+  .diamond,.swatches{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .flow{grid-template-columns:repeat(7,minmax(118px,1fr));overflow-x:auto;padding-bottom:8px}
+  .grid2,.iter{grid-template-columns:1fr}
+  .nav{display:none}
+  .stage .phone{width:min(260px,100%)}
+}
+@media (max-width: 480px){.diamond,.swatches{grid-template-columns:1fr}.stat b{font-size:60px}.scale div{grid-template-columns:1fr;gap:4px}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#top"><i aria-hidden="true"></i>DermaSafe</a>
+    <nav class="nav" aria-label="Case study sections">
+      <a href="#problem">Problem</a><a href="#research">Research</a><a href="#business">Business</a><a href="#people">People</a><a href="#scope">Scope</a><a href="#flow">Flow</a><a href="#screens">Screens</a><a href="#system">System</a><a href="#metrics">Metrics</a><a href="#checklist">Checklist</a><a href="#try">Try it</a>
+    </nav>
+    <span class="progress" id="progress"></span>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <span class="blob" aria-hidden="true"></span>
+    <div class="wrap">
+      <div>
+        <p class="kicker">UX case study, beauty and personal care</p>
+        <h1>People check ingredients <span>and still react.</span></h1>
+        <p class="lede" style="margin-top:26px">DermaSafe is an allergy-aware ingredient checker built for Indian skin. It checks a mixed shelf against a person’s real allergy profile and shows the source behind every warning.</p>
+        <div class="meta">
+          <div><small>Role</small><span>UX / UI design, research to prototype</span></div>
+          <div><small>Market</small><span>India, melanin-rich skin</span></div>
+          <div><small>Niche</small><span>Ingredient safety and conflicts</span></div>
+          <div><small>Output</small><span><span class="num">45</span>-screen coded prototype</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="phone still" data-screen="login" id="heroPhone" role="img" aria-label="DermaSafe prototype screens playing in sequence"></div>
+        <div class="cap"><span id="heroCap">Login</span><span class="dots" id="heroDots" aria-hidden="true"></span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="problem" style="padding-top:40px">
+    <div class="wrap">
+      <p class="kicker"><b>01</b>The problem</p>
+      <div class="split rv">
+        <h2>Global apps were built for someone else’s shelf.</h2>
+        <div style="display:flex;flex-direction:column;gap:18px">
+          <p class="lede">Indian consumers with diagnosed skin allergies build routines by mixing dermatologist-prescribed actives, Ayurvedic remedies and unbranded local products. Many have no barcode, no standard ingredient list, or labels in Hindi or a regional language.</p>
+          <p class="lede">No existing tool checks that full, mixed shelf against a person’s actual allergy profile, catches allergens hidden under alternate names, or accounts for the higher risk of pigmentation and scarring on melanin-rich skin.</p>
+        </div>
+      </div>
+      <div class="stats">
+        <div class="stat rv"><b class="num">0</b><p>reviewed competitors detect allergens under Ayurvedic or regional-language ingredient names</p></div>
+        <div class="stat rv"><b class="num">0</b><p>reviewed competitors build severity scoring around melanin-rich (Fitzpatrick IV–VI) skin</p></div>
+        <div class="stat rv"><b class="num">1</b><p>competitor offers real conflict detection, and it sits behind a paywall</p></div>
+      </div>
+      <div class="opp rv"><small>Problem statement</small>Indian adults with sensitive or allergy-prone skin, about 1 in 3, can’t tell whether a new product will react with their skin. Indian labels don’t have to use standard (INCI) ingredient names, and no tool checks their whole mixed shelf against their own allergy profile. So they react even after reading the label.</div>
+      <p class="hmw rv"><b>How might we</b> help them know, before they buy or apply, whether a product is safe for their skin and why, without needing a dermatologist for every decision?</p>
+    </div>
+  </section>
+
+  <section id="process" style="background:var(--surf2)">
+    <div class="wrap">
+      <p class="kicker"><b>02</b>Process</p>
+      <div class="split rv">
+        <h2>Double diamond, with validation built in.</h2>
+        <p class="lede">I worked through the problem space before touching screens. Research and empathy shaped one sharp definition; ideation and prototyping then looped back into validation.</p>
+      </div>
+      <div class="diamond">
+        <div class="phase rv"><small>Problem space</small><h3>Research and empathy</h3><p>Competitor review, and the problem as it shows up on Indian shelves: mixed brands, Ayurvedic and unbranded products, regional-language labels.</p></div>
+        <div class="phase rv"><small>Problem space</small><h3>Define</h3><p>Jobs to be done, value proposition canvas, and one north-star metric: allergens caught.</p></div>
+        <div class="phase rv"><small>Solution space</small><h3>Ideate and prototype</h3><p>A seven-stage flow, a warm design system, and a coded prototype.</p></div>
+        <div class="phase rv"><small>Solution space</small><h3>Validate and iterate</h3><p>Faculty review, a heuristic audit, and a KPI for every stage of the flow.</p></div>
+      </div>
+      <figure class="figure rv" style="margin-top:28px;padding:20px 12px;overflow-x:auto">
+        <svg viewBox="0 0 1000 440" role="img" aria-label="Double diamond: research and empathy diverge, define converges on a measurable result, ideate and prototype diverge, validation converges on impact, with iteration between the two diamonds" style="width:100%;min-width:620px;height:auto;display:block">
+          <defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" fill="var(--ink2)"></path></marker></defs>
+          <path d="M60 210 L245 40 L245 380 Z" fill="#E8A27F"></path>
+          <path d="M245 40 L430 210 L245 380 Z" fill="#7D210B"></path>
+          <path d="M570 210 L755 40 L755 380 Z" fill="#C2643A"></path>
+          <path d="M755 40 L940 210 L755 380 Z" fill="#A2391B"></path>
+          <g font-family="Lexend, sans-serif" font-weight="600" font-size="17" fill="#FFF2E7" text-anchor="middle">
+            <text x="180" y="195">Research</text><text x="180" y="240">Empathy</text><text x="320" y="216">Define</text>
+            <text x="690" y="195">Ideate</text><text x="690" y="240">Prototype</text><text x="835" y="216">Validate</text>
+          </g>
+          <g font-family="Instrument Sans, sans-serif" font-size="15" fill="var(--ink2)" text-anchor="middle">
+            <text x="245" y="26">Problem space</text><text x="755" y="26">Solution space</text>
+            <text x="500" y="200">Measurable</text><text x="500" y="220">result</text>
+            <text x="60" y="404">Awareness</text><text x="940" y="404">Impact</text>
+          </g>
+          <path d="M330 404 Q500 450 670 404" fill="none" stroke="var(--ink2)" stroke-width="2" stroke-dasharray="6 6" marker-start="url(#ah)" marker-end="url(#ah)"></path>
+          <text x="500" y="432" font-family="Instrument Sans, sans-serif" font-size="14" fill="var(--ink2)" text-anchor="middle">iterate</text>
+          <circle cx="400" cy="210" r="9" fill="#FEF3C7" stroke="#7D210B" stroke-width="3"><animate attributeName="r" values="7;12;7" dur="2.4s" repeatCount="indefinite"></animate></circle>
+        </svg>
+        <figcaption style="padding:0 8px">The marker shows where the key insight landed: deep in Define, once the whole-shelf problem was clear.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section id="research">
+    <div class="wrap">
+      <p class="kicker"><b>03</b>Secondary research</p>
+      <div class="split rv">
+        <h2>Common, under-served, and growing.</h2>
+        <p class="lede">Before designing anything, I read published studies, regulation and market reports. Six findings shaped the product, and each one maps to a design decision below. Sources are listed at the end of this section.</p>
+      </div>
+      <div class="rstats">
+        <div class="rstat rv"><b class="num">32.4%</b><p>of 3,012 Indians surveyed reported sensitive or very sensitive skin, rising to 36.7% of women.</p><cite>Brenaut, Misery &amp; Taieb, Frontiers in Medicine, 2019</cite></div>
+        <div class="rstat rv"><b class="num">2.7×</b><p>more people with sensitive skin name cosmetics as a trigger: 14.7% of them, against 5.5% of everyone else.</p><cite>Same study; the ratio is my calculation</cite></div>
+        <div class="rstat rv"><b class="num">~12,500</b><p>dermatologists for the whole country, roughly one for every 1.2 lakh people.</p><cite>KPMG India, Jan 2026; the ratio is my calculation for ~1.45 bn people</cite></div>
+        <div class="rstat rv"><b>2024</b><p>India’s Drugs Consultative Committee rejected making standard INCI names mandatory on cosmetic labels, citing lack of space on labels.</p><cite>ChemLinked, on the DCC meeting of 19 Jun 2024</cite></div>
+        <div class="rstat rv"><b class="num">US$5.1 bn</b><p>projected Indian skincare market by 2032, up from US$2.98 bn in 2026 (about 9.4% a year).</p><cite>Vyansa Intelligence, Mar 2026</cite></div>
+        <div class="rstat rv"><b class="num">15.8 M</b><p>people bought beauty products on Nykaa alone in FY25, up 27% in a year.</p><cite>Nykaa Q4 FY25 investor call</cite></div>
+      </div>
+
+      <h3 class="h3x rv">From finding to design decision</h3>
+      <p class="sub rv">Every insight had to change something on a screen, or I dropped it.</p>
+      <div class="tbl-wrap rv"><table>
+        <thead><tr><th scope="col">What I found</th><th scope="col">What it means</th><th scope="col">Design response</th></tr></thead>
+        <tbody>
+          <tr><td>1 in 3 report sensitive skin, and cosmetics are a named trigger</td><td>A large, everyday need, not a niche</td><td>Allergy profile with severity is the first thing the app asks for</td></tr>
+          <tr><td>Labels don’t have to use INCI names</td><td>The same allergen appears under different names, so simple text search misses it</td><td>Alias and regional-name matching, with “matched as” shown on each flag</td></tr>
+          <tr><td>About 1 dermatologist per 1.2 lakh people</td><td>Most people can’t ask an expert before they buy</td><td>The app handles routine checks and sends only uncertain cases to a dermatologist</td></tr>
+          <tr><td>Pigmentation after irritation is more common and severe on darker skin</td><td>A reaction costs melanin-rich skin more</td><td>Severity weighted for Fitzpatrick IV–VI, with calm early warnings</td></tr>
+          <tr><td>Herbal and Ayurvedic products were ~41% of personal care (Nielsen, 2017)</td><td>Many products have no barcode or a regional label</td><td>Label-photo reading, with a “check what we read” step before any result</td></tr>
+          <tr><td>Consumers are ingredient-conscious but self-medicate online</td><td>People already research, but alone and without sources</td><td>Plain-language reason and a named source on every flag</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3 class="h3x rv">Competitive landscape</h3>
+      <p class="sub rv">Ingredient apps already exist. The gap is the top-right corner: a personal check of the whole routine, built for Indian labels and skin.</p>
+      <div class="quad-wrap">
+        <figure class="quad rv" style="margin:0">
+          <svg viewBox="0 0 560 450" role="img" aria-label="Positioning map. Horizontal axis: looks up one product, to checks a whole routine against you. Vertical axis: global generic data, to built for Indian labels and skin. Yuka, INCIDecoder and EWG Skin Deep sit bottom left. SkinSort sits bottom right. CureSkin sits top left. DermaSafe sits alone in the top right." style="width:100%;height:auto;display:block">
+            <rect x="300" y="20" width="240" height="190" rx="14" fill="#FEF3C7"></rect>
+            <line x1="60" y1="210" x2="540" y2="210" stroke="var(--line)" stroke-width="1.5"></line>
+            <line x1="300" y1="20" x2="300" y2="400" stroke="var(--line)" stroke-width="1.5"></line>
+            <line x1="60" y1="400" x2="540" y2="400" stroke="var(--ink2)" stroke-width="1.5"></line>
+            <line x1="60" y1="20" x2="60" y2="400" stroke="var(--ink2)" stroke-width="1.5"></line>
+            <g font-family="Instrument Sans, sans-serif" font-size="13" fill="var(--ink2)">
+              <text x="60" y="424">Looks up one product</text>
+              <text x="540" y="424" text-anchor="end">Checks your whole routine against you</text>
+              <text x="0" y="0" transform="translate(40 400) rotate(-90)">Global, generic data</text>
+              <text x="0" y="0" transform="translate(40 210) rotate(-90)">Built for Indian labels and skin</text>
+              <text x="530" y="40" text-anchor="end" fill="#7D210B" font-weight="600">The gap</text>
+            </g>
+            <g font-family="Lexend, sans-serif" font-size="14" font-weight="500" fill="var(--ink)">
+              <circle cx="166" cy="347" r="8" fill="var(--ink2)"></circle><text x="180" y="352">Yuka</text>
+              <circle cx="108" cy="301" r="8" fill="var(--ink2)"></circle><text x="122" y="306">INCIDecoder</text>
+              <circle cx="214" cy="380" r="8" fill="var(--ink2)"></circle><text x="228" y="385">EWG Skin Deep</text>
+              <circle cx="396" cy="316" r="8" fill="var(--ink2)"></circle><text x="410" y="321">SkinSort</text>
+              <circle cx="200" cy="104" r="8" fill="var(--ink2)"></circle><text x="214" y="109">CureSkin</text>
+              <circle cx="460" cy="86" r="22" fill="#7D210B" opacity=".18"><animate attributeName="r" values="16;26;16" dur="2.6s" repeatCount="indefinite"></animate></circle>
+              <circle cx="460" cy="86" r="11" fill="#7D210B"></circle><text x="460" y="124" text-anchor="middle" font-weight="700" fill="#7D210B">DermaSafe</text>
+            </g>
+          </svg>
+          <figcaption style="padding:0 6px">Positions are my reading of each product’s public features, October 2026.</figcaption>
+        </figure>
+        <div class="comp">
+          <div class="tcard rv"><h3>Yuka <small>Global scanner</small></h3><p><b>Strength:</b> scale, with 65 million+ users in 12 countries. <b>Gap:</b> rates a product in general, not against your own allergies or Indian ingredient names.</p></div>
+          <div class="tcard rv"><h3>INCIDecoder <small>Reference</small></h3><p><b>Strength:</b> clear ingredient-by-ingredient explanations. <b>Gap:</b> a dictionary to read, not a personal check.</p></div>
+          <div class="tcard rv"><h3>SkinSort <small>Routine tools</small></h3><p><b>Strength:</b> checks how ingredients in a routine interact. <b>Gap:</b> built on a global product catalogue, with no focus on Ayurvedic or regional names.</p></div>
+          <div class="tcard rv"><h3>CureSkin <small>India, AI + doctors</small></h3><p><b>Strength:</b> India-native AI skin analysis with dermatologist follow-ups, acquired in 2024. <b>Gap:</b> sells you a regimen and doesn’t check what’s already on your shelf.</p></div>
+        </div>
+      </div>
+
+      <ol class="sources rv" aria-label="Sources">
+        <li><a href="https://www.frontiersin.org/journals/medicine/articles/10.3389/fmed.2019.00029/full" target="_blank" rel="noopener">Brenaut, Misery &amp; Taieb. Sensitive Skin in the Indian Population. Frontiers in Medicine, 2019</a></li>
+        <li><a href="https://assets.kpmg.com/content/dam/kpmgsites/in/pdf/2026/01/dermatology-market-in-india.pdf" target="_blank" rel="noopener">KPMG India. Dermatology market in India: sector snapshot, Jan 2026</a></li>
+        <li><a href="https://cosmetic.chemlinked.com/news/cosmetic-news/india-reviews-proposal-for-mandating-inci-names-on-cosmetic-labels" target="_blank" rel="noopener">ChemLinked. India reviews proposal for mandating INCI names on cosmetic labels, 2024</a></li>
+        <li><a href="https://www.bolsamania.com/nota-de-prensa/mercados/india-skin-care-market-to-reach-usd-51-billion-by-2032-driven-by-rising-grooming-awareness-and-consumer-beauty-culture-reports-vyansa-intelligence--22017186.html" target="_blank" rel="noopener">Vyansa Intelligence. India skin care market release, Mar 2026</a></li>
+        <li><a href="https://www.nykaa.com/media/wysiwyg/uiTools/2025-6/Transcript-Analyst-Investor-Conference-Call-Q4-FY25.pdf" target="_blank" rel="noopener">Nykaa. Q4 FY25 analyst and investor call transcript, 2025</a></li>
+        <li><a href="https://jcadonline.com/postinflammatory-hyperpigmentation-a-review-of-the-epidemiology-clinical-features-and-treatment-options-in-skin-of-color/" target="_blank" rel="noopener">Davis &amp; Callender. Postinflammatory hyperpigmentation in skin of color. J Clin Aesthet Dermatol, 2010</a></li>
+        <li><a href="https://www.exchange4media.com/advertising-news/big-ad-spendsbaba-ramdev-help-ayurveda-clinch-41of-the-rs-45k-crore-personal-care-market-in-india-69915.html" target="_blank" rel="noopener">exchange4media, citing Nielsen. Ayurveda’s share of personal care, Aug 2017</a></li>
+        <li><a href="https://cosmeticsbusiness.com/how-yuka-app-changing-consumer-brand-behaviour-beauty-cosmetics" target="_blank" rel="noopener">Cosmetics Business. How the Yuka app is changing consumer and brand behaviour</a></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="business" style="background:var(--surf2)">
+    <div class="wrap">
+      <p class="kicker"><b>04</b>Business opportunity</p>
+      <div class="split rv">
+        <h2>A trust product with a B2B engine.</h2>
+        <p class="lede">Ingredient lookups are free elsewhere, so a consumer subscription alone won’t carry the business. The asset is the trusted allergy profile. Once people trust DermaSafe with it, dermatologists and clinics have a reason to plug in.</p>
+      </div>
+      <div class="opp rv"><small>Opportunity statement</small>For the 1 in 3 Indian skincare buyers with sensitive skin, DermaSafe is the only check that reads Indian labels against your own allergy profile. It earns from people who want ongoing protection and from clinics that want to serve them better. It never earns from brands paying for scores.</div>
+
+      <h3 class="h3x rv">Market size, counted from the bottom up</h3>
+      <p class="sub rv">This is deliberately conservative: it counts buyers on one retailer only, so the real market is larger.</p>
+      <div class="sizing">
+        <figure class="rv" style="margin:0">
+          <svg viewBox="0 0 360 360" role="img" aria-label="Nested circles: total market 15.8 million online beauty buyers; serviceable market about 51 lakh with sensitive skin; obtainable market about 1 lakh users in three years." style="width:100%;max-width:400px;height:auto;display:block;margin:0 auto">
+            <circle cx="180" cy="180" r="172" fill="var(--surf)" stroke="var(--line)" stroke-width="2"></circle>
+            <circle cx="180" cy="236" r="114" fill="#ECDDCA"></circle>
+            <circle cx="180" cy="296" r="52" fill="#7D210B"></circle>
+            <g font-family="Lexend, sans-serif" text-anchor="middle">
+              <text x="180" y="48" font-size="13" fill="var(--ink2)">TAM</text><text x="180" y="78" font-size="26" font-weight="700" fill="var(--ink)">15.8 M+</text>
+              <text x="180" y="150" font-size="13" fill="#6A554C">SAM</text><text x="180" y="180" font-size="26" font-weight="700" fill="#22140F">≈51 lakh</text>
+              <text x="180" y="290" font-size="12" fill="#F1D6C7">SOM</text><text x="180" y="314" font-size="18" font-weight="700" fill="#FFF2E7">≈1 lakh</text>
+            </g>
+          </svg>
+        </figure>
+        <div>
+          <div class="tier rv"><b>TAM</b><div><strong>15.8 million+</strong><p>Yearly beauty buyers on Nykaa alone (FY25). This is the floor, not the whole online market.</p></div></div>
+          <div class="tier rv"><b>SAM</b><div><strong>≈51 lakh</strong><p>The share who report sensitive skin: 15.8 M × 32.4%. These people feel the problem today.</p></div></div>
+          <div class="tier rv"><b>SOM</b><div><strong>≈1 lakh users</strong><p>A realistic three-year reach of 2% of the SAM, through dermatologist referrals and search. This is my assumption.</p></div></div>
+        </div>
+      </div>
+
+      <h3 class="h3x rv">How the money flows</h3>
+      <p class="sub rv">Four revenue streams, launched in order of how much trust each one needs first.</p>
+      <div class="streams">
+        <div class="stream rv"><span class="who">Users · Phase 1</span><h3>Free core check</h3><p>Scan, flag, explain and fix. It earns nothing and builds the trust everything else depends on.</p><span class="price">₹0, always</span></div>
+        <div class="stream rv"><span class="who">Users · Phase 2</span><h3>DermaSafe Plus</h3><p>Shelf monitoring, alerts when a formula changes, family profiles and full history.</p><span class="price">~₹99 / month</span></div>
+        <div class="stream rv"><span class="who">Dermatologists · Phase 2</span><h3>Consult booking</h3><p>A low-confidence result routes to a video or in-clinic consult, with the shelf report shared by consent.</p><span class="price">Fee per booking</span></div>
+        <div class="stream rv"><span class="who">Clinics · Phase 3</span><h3>Clinic plan</h3><p>Patients share their shelf before a visit, and the clinic reviews flags from its area.</p><span class="price">~₹2,000 / clinic / month</span></div>
+      </div>
+      <div class="never rv"><b>Never, by design</b><span>Selling allergy data</span><span>Brands paying to change a score</span><span>Paid ranking</span></div>
+
+      <h3 class="h3x rv">Try the model</h3>
+      <p class="sub rv">An illustrative year-three revenue model. Drag the assumptions and watch which stream carries the business.</p>
+      <div class="est rv">
+        <div>
+          <div class="rg"><label for="eU">Users reached <output id="oU"></output></label><input type="range" id="eU" min="10000" max="300000" step="5000" value="100000"></div>
+          <div class="rg"><label for="eC">Users who upgrade to Plus <output id="oC"></output></label><input type="range" id="eC" min="1" max="10" step="0.5" value="4"></div>
+          <div class="rg"><label for="eP">Plus price per month <output id="oP"></output></label><input type="range" id="eP" min="49" max="199" step="10" value="99"></div>
+          <div class="rg"><label for="eK">Consults booked per 100 users a year <output id="oK"></output></label><input type="range" id="eK" min="0" max="10" step="0.5" value="3"></div>
+          <div class="rg"><label for="eF">Fee DermaSafe keeps per consult <output id="oF"></output></label><input type="range" id="eF" min="50" max="250" step="25" value="100"></div>
+          <div class="rg"><label for="eL">Clinics on the plan <output id="oL"></output></label><input type="range" id="eL" min="0" max="500" step="10" value="150"></div>
+        </div>
+        <div class="est-out" aria-live="polite">
+          <div><small>Yearly revenue</small><div class="est-total num" id="eTot">₹0</div></div>
+          <div class="sbar" aria-hidden="true"><i id="bP" style="background:#7D210B"></i><i id="bK" style="background:#C2643A"></i><i id="bL" style="background:#E8A27F"></i></div>
+          <div class="legend">
+            <div><i style="background:#7D210B"></i><span>Plus subscriptions</span><b class="num" id="lP"></b></div>
+            <div><i style="background:#C2643A"></i><span>Consult booking fees</span><b class="num" id="lK"></b></div>
+            <div><i style="background:#E8A27F"></i><span>Clinic plans</span><b class="num" id="lL"></b></div>
+          </div>
+          <p class="est-note" id="eNote"></p>
+        </div>
+      </div>
+
+      <h3 class="h3x rv">Why now</h3>
+      <div class="why">
+        <div class="tcard rv"><b>15–18%</b><p>yearly growth in cosmetic dermatology, about twice the pace of medical dermatology.</p><cite>KPMG India, 2026</cite></div>
+        <div class="tcard rv"><b>2024</b><p>CureSkin, an AI dermatology platform, was acquired for about ₹166 crore. Investors back this space.</p><cite>KPMG India, 2026</cite></div>
+        <div class="tcard rv"><b>2024</b><p>The regulator kept INCI optional, so confusing ingredient names on labels aren’t going away.</p><cite>ChemLinked, 2024</cite></div>
+        <div class="tcard rv"><b>25–42%</b><p>of skincare is already bought online. Estimates vary, but the shift to online shopping is clear.</p><cite>Vyansa 2026; Astute Analytica via KPMG</cite></div>
+      </div>
+
+      <h3 class="h3x rv">The moat: a map of Indian ingredient names</h3>
+      <div class="fly-wrap">
+        <figure class="rv" style="margin:0">
+          <svg viewBox="0 0 400 400" role="img" aria-label="Flywheel: more checks grow the alias dictionary, which makes flags more accurate, which builds trust and referrals, which brings more checks." style="width:100%;max-width:420px;height:auto;display:block;margin:0 auto">
+            <circle cx="200" cy="200" r="138" fill="none" stroke="var(--line)" stroke-width="2" stroke-dasharray="4 8"></circle>
+            <g class="orbit"><circle cx="200" cy="62" r="7" fill="#7D210B"></circle></g>
+            <g font-family="Lexend, sans-serif" font-size="13.5" font-weight="600" text-anchor="middle">
+              <rect x="125" y="36" width="150" height="52" rx="16" fill="#7D210B"></rect><text x="200" y="58" fill="#FFF2E7">More checks</text><text x="200" y="76" fill="#F1D6C7" font-weight="400" font-size="12">from free scans</text>
+              <rect x="262" y="174" width="134" height="52" rx="16" fill="#FEF3C7"></rect><text x="329" y="196" fill="#3A2410">Alias map grows</text><text x="329" y="214" fill="#6A554C" font-weight="400" font-size="12">new names, verified</text>
+              <rect x="125" y="312" width="150" height="52" rx="16" fill="#ECDDCA"></rect><text x="200" y="334" fill="#22140F">Sharper flags</text><text x="200" y="352" fill="#6A554C" font-weight="400" font-size="12">fewer misses</text>
+              <rect x="4" y="174" width="134" height="52" rx="16" fill="var(--surf)" stroke="var(--line)"></rect><text x="71" y="196" fill="var(--ink)">More trust</text><text x="71" y="214" fill="var(--ink2)" font-weight="400" font-size="12">and referrals</text>
+              <text x="200" y="186" fill="var(--ink)" font-size="13">Each loop</text><text x="200" y="204" fill="var(--ink)" font-size="13">makes the next</text><text x="200" y="222" fill="var(--ink)" font-size="13">one cheaper</text>
+            </g>
+          </svg>
+        </figure>
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <p class="lede">Anyone can copy the screens. What’s hard to copy is a dermatologist-verified map of how one allergen appears on Indian labels: in English, Hindi or regional scripts, Ayurvedic names and misspellings.</p>
+          <p class="lede">Every label photo a user confirms adds to that map. The more people check, the more accurate the next check becomes.</p>
+        </div>
+      </div>
+
+      <h3 class="h3x rv">Go-to-market</h3>
+      <div class="phases">
+        <div class="ph rv"><small>Phase 1 · months 0–6</small><h3>Earn trust</h3><ul><li>Free app in Pune and Mumbai</li><li>Five partner dermatologists set severity rules</li><li>Seed the alias map with the top 500 allergens</li></ul></div>
+        <div class="ph rv"><small>Phase 2 · months 6–18</small><h3>Earn revenue</h3><ul><li>Launch Plus and consult booking</li><li>Patients referred by dermatologists</li><li>Hindi interface, then Marathi and Tamil</li></ul></div>
+        <div class="ph rv"><small>Phase 3 · months 18–36</small><h3>Scale through clinics</h3><ul><li>Clinic plan for dermatology chains</li><li>Shelf reports shared before visits</li><li>Expand to tier-2 cities</li></ul></div>
+      </div>
+
+      <h3 class="h3x rv">Risks I designed against</h3>
+      <div class="tbl-wrap rv"><table>
+        <thead><tr><th scope="col">Risk</th><th scope="col">Why it matters</th><th scope="col">Mitigation in the design</th></tr></thead>
+        <tbody>
+          <tr><td>Medical liability</td><td>A wrong “safe” could cause harm</td><td>“A signal, not a diagnosis” on every flag; dermatologist-reviewed severity rules</td></tr>
+          <tr><td>Misread labels</td><td>Regional scripts and curved packaging confuse text reading</td><td>Users confirm extracted ingredients before any result</td></tr>
+          <tr><td>Alarm fatigue</td><td>Too many warnings and users stop trusting all of them</td><td>Severity levels, calm language, confidence shown, “Flag as wrong”</td></tr>
+          <tr><td>Money vs neutrality</td><td>Revenue pressure tempts brand deals</td><td>Brands can’t pay to change scores; the revenue model is shown in the Trust center</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </section>
+
+  <section id="people">
+    <div class="wrap">
+      <p class="kicker"><b>05</b>Who it’s for</p>
+      <div class="split rv">
+        <h2>A user managing a diagnosed condition, not a trend.</h2>
+        <p class="lede">The primary persona has a diagnosed allergy or sensitive skin and runs a routine across many brands. The value proposition canvas maps what they’re trying to do against what DermaSafe gives back.</p>
+      </div>
+      <div class="vpc">
+        <div class="vpc-side rv">
+          <h3>Customer profile <small>What they live with</small></h3>
+          <div class="vbox"><h4>Jobs</h4><ul><li>Build a routine from products across different brands</li><li>Try new products without triggering a reaction</li><li>Manage a diagnosed condition day to day</li><li>Act on a concern raised by their dermatologist</li></ul></div>
+          <div class="vbox"><h4>Pains</h4><ul><li>Reactions happen even after checking ingredients myself</li><li>Nothing checks my whole shelf against my allergy profile</li><li>The one real conflict-detection competitor is paywalled</li><li>Manual research takes forever and I still miss things</li></ul></div>
+          <div class="vbox"><h4>Gains</h4><ul><li>Peace of mind trying something new</li><li>A quick answer while standing in the store</li><li>Feeling in control of a condition, not anxious about it</li><li>Advice from doctors when needed</li></ul></div>
+        </div>
+        <div class="vpc-side rv">
+          <h3>Value map <small>What DermaSafe gives back</small></h3>
+          <div class="vbox hot"><h4>Product and service</h4><ul><li>Allergy-severity conflict checker, scan or manual add</li><li>Synonym and INCI alias detection</li><li>Point-of-purchase quick scan</li><li>Ongoing shelf monitoring</li></ul></div>
+          <div class="vbox"><h4>Pain relievers</h4><ul><li>Core safety check stays free, no paywall</li><li>Catches allergens hidden under alternate names</li><li>Checks the whole shelf, not one product at a time</li><li>Plain-language flag with a suggested fix</li></ul></div>
+          <div class="vbox"><h4>Gain creators</h4><ul><li>Instant confidence before buying</li><li>Flags personalized to severity, not generic skin type</li><li>Calm, non-alarmist warnings that build trust over time</li></ul></div>
+        </div>
+      </div>
+      <h3 class="h3x rv" id="fit">Fit check: does every pain have a reliever?</h3>
+      <p class="sub rv">A canvas only holds if each pain reliever answers a real pain. Each row links the pain, the reliever, the evidence behind it and the screen where it lives.</p>
+      <div class="fit">
+        <div class="fit-row fit-head" aria-hidden="true"><div>Pain</div><div></div><div>Pain reliever</div><div>Evidence and screen</div></div>
+        <div class="fit-row rv"><div class="fit-p">“Reactions happen even after I check ingredients myself.”</div><div class="fit-a" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div><div class="fit-r">Alias and regional-name matching catches the same allergen under another name.</div><div class="fit-e"><b>INCI names optional on Indian labels (2024)</b>Screen: Ingredients</div></div>
+        <div class="fit-row rv"><div class="fit-p">“Nothing checks my whole shelf against my allergy profile.”</div><div class="fit-a" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div><div class="fit-r">Whole-routine conflict check, weighted by your own severity tags.</div><div class="fit-e"><b>No reviewed competitor does this for Indian names</b>Screen: Conflict</div></div>
+        <div class="fit-row rv"><div class="fit-p">“The one real conflict checker is behind a paywall.”</div><div class="fit-a" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div><div class="fit-r">The core safety check is free, always. Plus pays for monitoring, not safety.</div><div class="fit-e"><b>Competitor review</b>Screens: Login, Trust center</div></div>
+        <div class="fit-row rv"><div class="fit-p">“Manual research takes forever and I still miss things.”</div><div class="fit-a" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div><div class="fit-r">One scan gives a plain-language flag, its source and a suggested fix.</div><div class="fit-e"><b>~1 dermatologist per 1.2 lakh people</b>Screens: Red flags, Solution</div></div>
+      </div>
+      <span class="verdict rv"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>4 of 4 pains relieved, each one with evidence</span>
+    </div>
+  </section>
+
+  <section id="scope" style="background:var(--surf2)">
+    <div class="wrap">
+      <p class="kicker"><b>06</b>Scope</p>
+      <div class="split rv">
+        <h2>Must-haves only, ranked with MoSCoW.</h2>
+        <p class="lede">I ranked every feature by one question: is the allergen still caught without it? The musts are the smallest set that makes a check safe. Everything else waits, and some things never ship.</p>
+      </div>
+      <div class="moscow">
+        <div class="mcol must rv" style="--c:#7D210B"><h3>Must have <small>v1, ranked</small></h3><p class="mt">Without these, the check isn’t safe.</p>
+          <ol>
+            <li><span class="n">1</span><span>Allergy profile with severity: mild, moderate, severe <span class="inp">In prototype</span></span></li>
+            <li><span class="n">2</span><span>Barcode, label photo and manual entry <span class="inp">In prototype</span></span></li>
+            <li><span class="n">3</span><span>Alias and regional-name matching against a verified allergen source</span></li>
+            <li><span class="n">4</span><span>Personal red flags with severity and source label <span class="inp">In prototype</span></span></li>
+            <li><span class="n">5</span><span>Whole-routine conflict check <span class="inp">In prototype</span></span></li>
+            <li><span class="n">6</span><span>Plain-language fix with a confidence level <span class="inp">In prototype</span></span></li>
+            <li><span class="n">7</span><span>Low-confidence route to a dermatologist, plus “Flag as wrong” <span class="inp">In prototype</span></span></li>
+            <li><span class="n">8</span><span>Consent-first privacy; data never sold <span class="inp">In prototype</span></span></li>
+          </ol></div>
+        <div class="mcol rv" style="--c:#C2643A"><h3>Should have <small>next release</small></h3><p class="mt">Important, but the check still works without them.</p>
+          <ol>
+            <li><span class="n">1</span><span>Dermatologist booking and chat, with consent before photos <span class="inp">In prototype</span></span></li>
+            <li><span class="n">2</span><span>Check history and saved results <span class="inp">In prototype</span></span></li>
+            <li><span class="n">3</span><span>Dark mode, larger text and screen-reader support <span class="inp">In prototype</span></span></li>
+            <li><span class="n">4</span><span>Hindi and regional-language interface</span></li>
+            <li><span class="n">5</span><span>Trust center and open methodology <span class="inp">In prototype</span></span></li>
+          </ol></div>
+        <div class="mcol rv" style="--c:#E8A27F"><h3>Could have <small>if time allows</small></h3><p class="mt">Nice to have; dropped first under pressure.</p>
+          <ol>
+            <li><span class="n">1</span><span>Compare two products <span class="inp">In prototype</span></span></li>
+            <li><span class="n">2</span><span>Share a report with your doctor <span class="inp">In prototype</span></span></li>
+            <li><span class="n">3</span><span>Clinic view for dermatologists <span class="inp">In prototype</span></span></li>
+            <li><span class="n">4</span><span>Shelf monitoring and formula-change alerts</span></li>
+            <li><span class="n">5</span><span>Labelled sponsored listings, never ranked</span></li>
+          </ol></div>
+        <div class="mcol wont rv" style="--c:var(--ink2)"><h3>Won’t have <small>and why</small></h3><p class="mt">Ruled out on purpose, not forgotten.</p>
+          <ol>
+            <li><span class="n">✕</span><span><span class="t">Diagnose skin conditions from photos</span><em>That’s medical-device territory. We flag products, not people.</em></span></li>
+            <li><span class="n">✕</span><span><span class="t">Paid scores or rankings</span><em>One bought score breaks trust in every other score.</em></span></li>
+            <li><span class="n">✕</span><span><span class="t">Selling allergy data</span><em>It’s health data, and trust is the product.</em></span></li>
+            <li><span class="n">✕</span><span><span class="t">In-app shop and checkout</span><em>Selling products conflicts with judging them.</em></span></li>
+            <li><span class="n">✕</span><span><span class="t">Streaks, points and social feeds</span><em>Anxiety isn’t engagement.</em></span></li>
+          </ol></div>
+      </div>
+      <p class="sub rv" style="margin-top:20px">The prototype includes some should- and could-haves so reviewers can test them. Version 1 ships only the must-haves.</p>
+    </div>
+  </section>
+
+  <section id="flow" class="band">
+    <div class="wrap">
+      <p class="kicker"><b>07</b>The flow</p>
+      <div class="split rv">
+        <h2>Seven screens, one decision made safely.</h2>
+        <p class="lede">Every stage answers one job, and every stage has one number that proves it works. Pick a stage to see its job, its live screen, and its KPI. The phone is tappable.</p>
+      </div>
+      <div class="flow" role="tablist" aria-label="Flow stages" id="flowTabs"></div>
+      <div class="stage" id="stage">
+        <div><div class="phone" id="flowPhone" data-screen="login"></div></div>
+        <div class="stage-copy" id="flowCopy" role="tabpanel" aria-live="polite"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="screens" style="padding-bottom:40px">
+    <div class="wrap">
+      <p class="kicker"><b>08</b>Key screens</p>
+      <div class="split rv" style="align-items:end">
+        <h2>Calm by default, specific when it matters.</h2>
+        <div style="display:flex;flex-direction:column;gap:20px">
+          <p class="lede">Warm sand surfaces keep the experience unclinical. Rust is saved for actions, and a highlighter marks only the ingredients that matter to you.</p>
+          <div class="rail-ctl"><button aria-label="Previous screens" data-rail="-1"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><button aria-label="Next screens" data-rail="1"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button></div>
+        </div>
+      </div>
+    </div>
+    <div class="rail" id="rail" tabindex="0" aria-label="Key screens, scroll sideways"></div>
+  </section>
+
+  <section style="padding-top:40px">
+    <div class="wrap">
+      <div class="split rv">
+        <h2>States, not just screens.</h2>
+        <p class="lede">Three moments where the interface changes in place: the analysis shows progress honestly, the ingredient list filters without losing your place, and the score admits when it isn’t sure.</p>
+      </div>
+      <div class="states">
+        <div class="state-card rv"><div class="phone still" id="stLoop" data-screen="analyzing"></div><p class="muted" style="text-align:center;font-size:15px">AI analysis, four honest steps</p></div>
+        <div class="state-card rv"><div class="phone still" id="stFilter" data-screen="ingredients"></div><div class="seg" id="segFilter" role="group" aria-label="Ingredient filter"></div></div>
+        <div class="state-card rv"><div class="phone still" id="stConf" data-screen="score"></div><div class="seg" id="segConf" role="group" aria-label="Score confidence"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="system" style="background:var(--surf2)">
+    <div class="wrap">
+      <p class="kicker"><b>09</b>Design system</p>
+      <div class="split rv">
+        <h2>Colours that feel like skin, not a hospital.</h2>
+        <p class="lede">The palette comes from skin tones and clay rather than clinical blue. Risk colours sit apart from the brand, and every risk carries an icon and a word, never colour alone.</p>
+      </div>
+      <div class="swatches">
+        <div class="sw rv"><i style="background:#7D210B"></i><div><b>Rust</b><span class="num">#7D210B</span><span>Actions and emphasis</span></div></div>
+        <div class="sw rv"><i style="background:#FFF2E7"></i><div><b>Cream</b><span class="num">#FFF2E7</span><span>Cards and inputs</span></div></div>
+        <div class="sw rv"><i style="background:#ECDDCA"></i><div><b>Sand</b><span class="num">#ECDDCA</span><span>Secondary surfaces</span></div></div>
+        <div class="sw rv"><i style="background:#FEF3C7"></i><div><b>Beeswax</b><span class="num">#FEF3C7</span><span>Highlights and matches</span></div></div>
+      </div>
+      <div class="chips rv" aria-label="Risk and source labels">
+        <span style="background:#DFEFE5;color:#2C6A4D">✓ Fine for you</span><span style="background:#FAE9C4;color:#875500">▲ Moderate</span><span style="background:#F7DEDA;color:#9C2828">■ High risk</span><span style="background:#ECE3DD;color:#5C504B">? Unknown</span>
+        <span style="background:transparent;color:var(--ink2);border:1px solid var(--line);border-radius:999px">Verified source</span><span style="background:transparent;color:var(--ink2);border:1px solid var(--line);border-radius:999px">AI interpretation</span><span style="background:transparent;color:var(--ink2);border:1px dashed var(--line);border-radius:999px">Unable to verify</span>
+      </div>
+      <div class="scale rv" aria-label="Type roles">
+        <div><small>Display, Bricolage 38</small><span style="font:700 38px/1.1 'Bricolage Grotesque',sans-serif;letter-spacing:-.03em">Know what’s going on your skin.</span></div>
+        <div><small>Page title, 29</small><span style="font:600 29px/1.15 'Bricolage Grotesque',sans-serif;letter-spacing:-.025em">What’s inside this product?</span></div>
+        <div><small>Section, 19</small><span style="font:600 19px 'Bricolage Grotesque',sans-serif">Why we recommend this</span></div>
+        <div><small>Body, Figtree 15</small><span style="font:400 15px 'Figtree',sans-serif">Fragrance can irritate sensitive skin. We matched it to the itching you described.</span></div>
+        <div><small>Label strip, 12 caps</small><span style="font:600 12px 'Figtree',sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2)">Aqua, Glycerin, Niacinamide, <mark style="background:linear-gradient(transparent 46%,#F5B489 46%,#F5B489 92%,transparent 92%);color:var(--ink)">Parfum</mark>, <mark style="background:linear-gradient(transparent 46%,#F5B489 46%,#F5B489 92%,transparent 92%);color:var(--ink)">Linalool</mark></span></div>
+      </div>
+      <div class="sys-live">
+        <div class="rv">
+          <h3 style="font-size:clamp(22px,2.4vw,28px);letter-spacing:-.02em">Every component from one design system.</h3>
+          <p class="lede" style="margin-top:14px">All 45 screens share one set of tokens for colour, type, radius and spacing, and 14 components. Dark mode uses the same components with a second set of tokens. The library on the right is a live screen built from the same code as the app.</p>
+          <div class="inv"><span>Button ×3</span><span>Risk status</span><span>Source label</span><span>Step progress</span><span>Header</span><span>Card</span><span>List row</span><span>Toggle</span><span>Segmented control</span><span>Input</span><span>Choice option</span><span>Accordion</span><span>Bottom sheet</span><span>Tab bar</span></div>
+        </div>
+        <div><div class="phone" id="libPhone" data-screen="components"></div><p class="hint">Live component library, scroll inside</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="trust">
+    <div class="wrap">
+      <p class="kicker"><b>10</b>Trust by design</p>
+      <div class="split rv">
+        <h2>A warning is only useful if you believe it.</h2>
+        <p class="lede">An app that cries wolf gets ignored, and an ignored warning protects no one. So every decision on the risk screens is about earning belief, not raising alarm.</p>
+      </div>
+      <div class="grid3">
+        <div class="tcard rv"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></span><h3>Every flag names its source</h3><p>Verified source, clinically reviewed rule, or AI interpretation. Separate labels, never merged into one badge.</p></div>
+        <div class="tcard rv"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4M12 17h.01"/></svg></span><h3>Calm language</h3><p>“We found something worth checking”, never “dangerous”. Each flag says it’s a product-safety signal, not a diagnosis.</p></div>
+        <div class="tcard rv"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1"/><path d="M8 15a6 6 0 0 0 12 0v-3"/><circle cx="20" cy="10" r="2"/></svg></span><h3>A human when it’s uncertain</h3><p>Low confidence shows a score range and routes to a dermatologist instead of a confident-looking guess.</p></div>
+        <div class="tcard rv"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7"/></svg></span><h3>“Flag as wrong”</h3><p>Every warning can be disputed and sent for human review, so mistakes become corrections.</p></div>
+        <div class="tcard rv"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span><h3>Consent before data</h3><p>Allergy data is never sold. Research sharing is off by default, and skin photos need consent before they’re shared.</p></div>
+        <div class="tcard rv"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M8 12h8M12 8v8"/></svg></span><h3>Free where it counts</h3><p>The free-versus-paid split lives only in Settings. Sponsored products are labelled and never ranked.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="metrics" style="background:var(--surf2)">
+    <div class="wrap">
+      <p class="kicker"><b>11</b>Success metrics</p>
+      <div class="split rv">
+        <h2>Every stage has one number that proves it works.</h2>
+        <p class="lede">The north star is the allergen catch rate. A pretty flow that misses a severe allergen has failed, however good it looks.</p>
+      </div>
+      <div class="tbl-wrap rv"><table>
+        <thead><tr><th scope="col">Stage</th><th scope="col">KPI</th><th scope="col">What it proves</th></tr></thead>
+        <tbody id="kpiBody"></tbody>
+      </table></div>
+    </div>
+  </section>
+
+  <section id="decisions">
+    <div class="wrap">
+      <p class="kicker"><b>12</b>Decisions from critique</p>
+      <div class="split rv">
+        <h2>What review changed.</h2>
+        <p class="lede">Faculty review and a heuristic audit of the first version exposed places where the design worked against its own principles. These changes are in the prototype.</p>
+      </div>
+      <div class="iter">
+        <div class="tcard rv"><h3><span class="tag">Applied</span>Smaller, labelled navigation</h3><p>Faculty feedback: the floating bar was too large. Its 74 px circles took about 12% of the screen and covered primary buttons. The docked bar names every tab, and it hides during the seven-step check so people finish the task.</p>
+          <div class="navdemo" aria-hidden="true"><small class="muted">First version</small><div class="bar old"><i class="a"></i><i></i><i></i><i></i></div><small class="muted">Prototype</small><div class="bar new"><i>Home</i><i>History</i><i class="a">Check</i><i>Doctors</i><i>Profile</i></div></div></div>
+        <div class="tcard rv"><h3><span class="tag">Applied</span>Confidence as levels</h3><p>“89%” suggested statistical precision the model doesn’t have. The prototype shows “High” with the four checks behind it, including the one that’s weak.</p></div>
+        <div class="tcard rv"><h3><span class="tag">Applied</span>Verification describes data</h3><p>A “Verified Safe Formula” badge sat above “2 flagged”, so the screen said safe and unsafe at once. Now each field shows its source, with a plain explainer of what verified does and doesn’t mean.</p></div>
+        <div class="tcard rv"><h3><span class="tag">Applied</span>The next step is never hidden</h3><p>Main buttons used to sit under the navigation. Every screen now keeps its main action clear, and uncertain results get their own screen with a range and a route to a doctor.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="checklist" style="background:var(--surf2)">
+    <div class="wrap">
+      <p class="kicker"><b>13</b>Review checklist</p>
+      <div class="split rv">
+        <h2>Checked against the brief.</h2>
+        <p class="lede">My faculty’s checklist from two review sessions, and where this case study answers each point. Jump to any one to check it.</p>
+      </div>
+      <div class="rubric rv">
+        <div class="grp">From session 1</div>
+        <div class="rrow"><span class="ok" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><h3>Problem statement is specific, no vague one-liners</h3><p>Who, what and why in one statement, backed by numbers, plus a how-might-we.</p><a href="#problem">See problem</a></div>
+        <div class="rrow"><span class="ok" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><h3>JTBD is visible in the flow</h3><p>Each of the seven stages states its job to be done next to its live screen.</p><a href="#flow">See flow</a></div>
+        <div class="rrow"><span class="ok" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><h3>KPI is traceable in the flow</h3><p>Every stage carries one KPI, and they roll up to one north-star metric.</p><a href="#metrics">See metrics</a></div>
+        <div class="grp">From session 2</div>
+        <div class="rrow"><span class="ok" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><h3>Must-haves only, ranked with MoSCoW</h3><p>Eight ranked musts for v1; should, could and won’t are kept out, each with a reason.</p><a href="#scope">See scope</a></div>
+        <div class="rrow"><span class="ok" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><h3>VPC fit holds: pain relievers map to real pains</h3><p>Four pains, four relievers, each with its evidence and screen.</p><a href="#fit">See fit</a></div>
+        <div class="rrow"><span class="ok" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><h3>One flow, clickable end-to-end</h3><p>Login to solution runs in the live prototype, right on this page.</p><a href="#try">Try it</a></div>
+        <div class="rrow"><span class="ok" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><h3>Every component from one design system</h3><p>One token set and 14 shared components. The library is itself a live screen.</p><a href="#system">See system</a></div>
+        <div class="tool"><span class="ok" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19 7-7 3 3-7 7-3-3z"/><path d="m18 13-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="m2 2 7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg></span><div><h3 style="font-size:16.5px">Tool: Figma</h3><p>Research boards, the value proposition canvas and the first-version screens were designed in Figma. The second version was prototyped in code to test real behaviour: filters, timers, sheets and dark mode.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="try">
+    <div class="wrap tryit">
+      <div>
+        <p class="kicker"><b>14</b>Try it</p>
+        <h2 class="rv">The whole app, in your hand.</h2>
+        <p class="lede rv" style="margin-top:20px">45 connected screens: the seven-stage check, trust center, privacy controls, dark mode, and booking a dermatologist with chat. Tap anywhere on the phone.</p>
+        <div class="seg rv" id="modeSeg" role="group" aria-label="Prototype appearance" style="margin:24px 0 0"><button type="button" aria-pressed="true" data-mode="light">Light</button><button type="button" aria-pressed="false" data-mode="dark">Dark</button></div>
+        <p style="margin-top:24px" class="rv"><a class="btn o" href="proto/index.html">Open the full prototype</a></p>
+      </div>
+      <div><div class="phone" id="tryPhone" data-screen="home"></div><p class="hint">Live prototype, fully interactive</p></div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <p class="kicker"><b>15</b>Reflection</p>
+      <div class="split">
+        <h2 class="rv">Trust is the feature.</h2>
+        <div style="display:flex;flex-direction:column;gap:18px" class="rv">
+          <p class="lede">The hardest design problem wasn’t scanning or scoring. It was making a warning people believe without making them afraid. Separating sources, keeping language calm and giving every result a human escape route did more for trust than any visual polish.</p>
+          <p class="lede">Next, I want to test the OCR flow on real regional-language labels and measure the allergen catch rate with a dermatologist-reviewed test set.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+(function () {
+  var reduce = false; try { reduce = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+
+  /* live phone: a prototype screen scaled to fit the frame */
+  function mount(el, eager) {
+    var scr = document.createElement('div'); scr.className = 'scr';
+    var fr = document.createElement('iframe');
+    fr.title = 'DermaSafe prototype screen'; fr.loading = eager ? 'eager' : 'lazy';
+    fr.src = 'proto/shot.html#' + el.getAttribute('data-screen');
+    if (el.classList.contains('still')) fr.tabIndex = -1;
+    scr.appendChild(fr); el.appendChild(scr);
+    var p = { el: el, fr: fr, ready: false, queue: [] };
+    fr.addEventListener('load', function () { p.ready = true; p.queue.forEach(function (m) { send(p, m); }); p.queue = []; });
+    function fit() { var w = scr.clientWidth; if (w) fr.style.transform = 'scale(' + (w / 393) + ')'; }
+    fit(); if ('ResizeObserver' in window) new ResizeObserver(fit).observe(scr);
+    return p;
+  }
+  function send(p, msg) { if (!p.ready) { p.queue.push(msg); return; } try { p.fr.contentWindow.postMessage(msg, location.origin); } catch (e) {} }
+
+  // hero: one phone stepping through the journey
+  var HERO = [['login', 'Login'], ['home', 'Home'], ['concern', 'State concern'], ['add', 'Add product'], ['analyzing', 'AI analysis'], ['ingredients', 'Ingredients'], ['redflags', 'Red flags'], ['score', 'Fit score'], ['solution', 'Solution'], ['care', 'Dermatologist care']];
+  var hero = mount(document.getElementById('heroPhone'), true), hcap = document.getElementById('heroCap'), hd = document.getElementById('heroDots'), hi = 0;
+  HERO.forEach(function () { hd.appendChild(document.createElement('i')); });
+  function heroTo(n) { hi = n; if (n) send(hero, { jump: HERO[n][0] }); hcap.textContent = HERO[n][1]; [].forEach.call(hd.children, function (d, k) { d.classList.toggle('on', k === n); }); }
+  heroTo(0);
+  if (!reduce) setInterval(function () { if (document.hidden) return; heroTo((hi + 1) % HERO.length); if (hi === 0) send(hero, { jump: 'login' }); }, 3200);
+
+  // flow explorer
+  var FLOW = [
+    ['Login', 'login', 'When I open the app for the first time, I want to see that <em>safety checks are free and derm-reviewed</em>, so I can decide if I trust it before giving it my data.', 'Trust-signal view rate', 'Share of new users who view the “free and derm-reviewed” message before proceeding.'],
+    ['Concern', 'concern', 'When I describe my concern in my own words, I want to see <em>the app confirm what it understood</em>, so I can correct it before it checks the wrong thing.', 'Concern-match accuracy', 'Share of AI-restated concerns the user confirms as correct without editing.'],
+    ['Scan / add', 'add', 'When I scan a product with no barcode, I want to see <em>the ingredients it extracted before it checks anything</em>, so I can catch a misread.', 'Ingredient extraction success', 'Share of unbarcoded or regional-label products correctly read and matched. The core India-specific value.'],
+    ['Ingredients', 'ingredients', 'When I view a product’s ingredient list, I want to see <em>which ones match my allergy profile immediately</em>, so I can skip reading the whole label.', 'Scan-to-flag-view rate', 'Share of highlighted allergen matches actually opened and read, not scrolled past.'],
+    ['Red flags', 'redflags', 'When I see an ingredient flagged as a conflict, I want to see <em>it’s backed by a verified source, not just AI</em>, so I can trust the warning is real.', 'Allergen catch rate', 'Share of known user allergens correctly flagged, and missed severe flags per 1,000 scans.', true],
+    ['Conflict', 'conflict', 'When I see a safety check for my products together, I want to understand <em>exactly what’s clashing and why</em>, so I can choose, not just feel alarmed.', 'Score comprehension rate', 'Share of users who can explain why a score was given, in a post-flow survey.'],
+    ['Solution', 'solution', 'When I get a suggested fix, I want to see <em>how confident the app is</em>, so I can decide whether to act on it or ask a dermatologist instead.', 'Reaction avoidance', 'Share of users who report the fix helped them avoid a reaction.']
+  ];
+  var tabs = document.getElementById('flowTabs'), copy = document.getElementById('flowCopy'), fp = mount(document.getElementById('flowPhone')), fi = 0;
+  FLOW.forEach(function (f, i) {
+    var b = document.createElement('button'); b.setAttribute('role', 'tab'); b.id = 'ft' + i; b.setAttribute('aria-controls', 'flowCopy');
+    b.innerHTML = '<small>0' + (i + 1) + '</small><span>' + f[0] + '</span>';
+    b.addEventListener('click', function () { setFlow(i, true); }); tabs.appendChild(b);
+  });
+  tabs.addEventListener('keydown', function (e) { if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { var n = (fi + (e.key === 'ArrowRight' ? 1 : 6)) % 7; setFlow(n, true); document.getElementById('ft' + n).focus(); } });
+  function setFlow(i, user) {
+    fi = i; var f = FLOW[i];
+    [].forEach.call(tabs.children, function (b, k) { b.setAttribute('aria-selected', k === i); b.tabIndex = k === i ? 0 : -1; });
+    copy.setAttribute('aria-labelledby', 'ft' + i);
+    copy.innerHTML = '<p style="font:500 14px var(--f-b);color:#F1D6C7">Job to be done, stage ' + (i + 1) + ' of 7</p><p class="jtbd">' + f[2] + '</p>' +
+      '<div class="kpi"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-6"/></svg></span><div><b>' + f[3] + '</b><p>' + f[4] + '</p>' + (f[5] ? '<span class="north">North star metric</span>' : '') + '</div></div>';
+    if (user) send(fp, { jump: f[1] });
+    if (user && !reduce) { copy.classList.remove('fade-swap'); void copy.offsetWidth; copy.classList.add('fade-swap'); }
+  }
+  setFlow(0, false);
+
+  // screens rail
+  var RAIL = [['login', 'Login', 'Trust before sign-up'], ['consent', 'Privacy consent', 'Research sharing off by default'], ['home', 'Home', 'One clear next step'], ['concern', 'State concern', 'Own words, live AI preview'], ['add', 'Add product', 'Barcode, label photo or search'], ['found', 'Product found', 'A source on every field'], ['ingredients', 'Ingredients', 'Your matches highlighted on the label'], ['redflags', 'Red flags', 'A signal, not a diagnosis'], ['conflict', 'Conflict', 'Checked against your routine'], ['score', 'Fit score', 'Fit, not a medical rating'], ['solution', 'Solution', 'A fix and an honest confidence'], ['care', 'Dermatologist care', 'A human when it matters'], ['chat', 'Chat', 'Consent before skin photos'], ['trust', 'Trust center', 'How the app earns trust']];
+  var rail = document.getElementById('rail');
+  RAIL.forEach(function (r) {
+    var fig = document.createElement('figure'); var ph = document.createElement('div'); ph.className = 'phone still'; ph.setAttribute('data-screen', r[0]);
+    ph.setAttribute('role', 'img'); ph.setAttribute('aria-label', 'DermaSafe ' + r[1] + ' screen');
+    fig.appendChild(ph); var c = document.createElement('figcaption'); c.innerHTML = '<b>' + r[1] + '</b>' + r[2]; fig.appendChild(c); rail.appendChild(fig); mount(ph);
+  });
+  document.querySelectorAll('[data-rail]').forEach(function (b) { b.addEventListener('click', function () { rail.scrollBy({ left: Number(b.getAttribute('data-rail')) * 544, behavior: reduce ? 'auto' : 'smooth' }); }); });
+
+  // states
+  var loop = mount(document.getElementById('stLoop'));
+  if (!reduce) setInterval(function () { if (!document.hidden) send(loop, { jump: 'analyzing' }); }, 6500);
+  function segDemo(phoneId, segId, items) {
+    var p = mount(document.getElementById(phoneId)), seg = document.getElementById(segId);
+    items.forEach(function (x, k) { var b = document.createElement('button'); b.type = 'button'; b.textContent = x[0]; b.setAttribute('aria-pressed', k === 0); b.addEventListener('click', function () { send(p, x[1]); [].forEach.call(seg.children, function (c, j) { c.setAttribute('aria-pressed', j === k); }); }); seg.appendChild(b); });
+  }
+  segDemo('stFilter', 'segFilter', [['All', { set: { ingFilter: 'all' } }], ['To review', { set: { ingFilter: 'review' } }], ['Fine', { set: { ingFilter: 'fine' } }]]);
+  segDemo('stConf', 'segConf', [['Confident', { jump: 'score' }], ['Unsure', { jump: 'lowconf' }]]);
+
+  // try it
+  var tp = mount(document.getElementById('tryPhone'));
+  document.querySelectorAll('#modeSeg button').forEach(function (b) { b.addEventListener('click', function () { document.querySelectorAll('#modeSeg button').forEach(function (x) { x.setAttribute('aria-pressed', x === b); }); send(tp, { mode: b.getAttribute('data-mode') }); }); });
+
+  // component library
+  mount(document.getElementById('libPhone'));
+
+  // revenue model
+  function inr(x) { return x >= 1e7 ? '₹' + (x / 1e7).toFixed(2) + ' cr' : '₹' + (x / 1e5).toFixed(1) + ' L'; }
+  function ppl(x) { return x >= 1e5 ? (x / 1e5).toFixed(x % 1e5 ? 1 : 0) + ' lakh' : Math.round(x / 1000) + 'k'; }
+  var E = {}; ['U', 'C', 'P', 'K', 'F', 'L'].forEach(function (k) { E[k] = document.getElementById('e' + k); E[k].addEventListener('input', model); });
+  function model() {
+    var u = +E.U.value, c = +E.C.value, p = +E.P.value, k = +E.K.value, f = +E.F.value, l = +E.L.value;
+    var rp = u * c / 100 * p * 12, rk = u * k / 100 * f, rl = l * 2000 * 12, t = rp + rk + rl || 1;
+    document.getElementById('oU').textContent = ppl(u);
+    document.getElementById('oC').textContent = c + '%';
+    document.getElementById('oP').textContent = '₹' + p;
+    document.getElementById('oK').textContent = k;
+    document.getElementById('oF').textContent = '₹' + f;
+    document.getElementById('oL').textContent = l + ' × ₹2,000/mo';
+    document.getElementById('eTot').textContent = inr(rp + rk + rl);
+    [['P', rp], ['K', rk], ['L', rl]].forEach(function (s) { document.getElementById('b' + s[0]).style.width = (s[1] / t * 100) + '%'; document.getElementById('l' + s[0]).textContent = inr(s[1]); });
+    var b2b = Math.round((rk + rl) / t * 100);
+    document.getElementById('eNote').textContent = b2b >= 40
+      ? 'Dermatologists and clinics bring ' + b2b + '% of revenue. That’s why trust with doctors comes before growth hacks.'
+      : 'Plus brings ' + (100 - b2b) + '% of revenue here, so the business rides on consumer conversion, the hardest number to move.';
+  }
+  model();
+
+  // KPI table
+  var kb = document.getElementById('kpiBody');
+  FLOW.forEach(function (f, i) { var tr = document.createElement('tr'); if (f[5]) tr.className = 'star'; tr.innerHTML = '<td>0' + (i + 1) + ' ' + f[0] + '</td><td>' + f[3] + (f[5] ? ' <span class="north" style="margin:0 0 0 6px">North star</span>' : '') + '</td><td>' + f[4] + '</td>'; kb.appendChild(tr); });
+
+  // progress + active nav
+  var bar = document.getElementById('progress'), links = document.querySelectorAll('.nav a');
+  function onScroll() {
+    var h = document.documentElement; bar.style.width = (h.scrollTop / Math.max(1, h.scrollHeight - h.clientHeight) * 100) + '%';
+    var cur = ''; document.querySelectorAll('main section[id]').forEach(function (s) { if (s.getBoundingClientRect().top < 140) cur = s.id; });
+    links.forEach(function (a) { a.classList.toggle('on', a.getAttribute('href') === '#' + cur); });
+  }
+  addEventListener('scroll', onScroll, { passive: true }); onScroll();
+
+  // reveal below the fold only
+  if (!reduce && 'IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.remove('pre'); io.unobserve(e.target); } }); }, { rootMargin: '0px 0px -8% 0px' });
+    document.querySelectorAll('.rv').forEach(function (el) { if (el.getBoundingClientRect().top > innerHeight) { el.classList.add('pre'); io.observe(el); } });
+  }
+
+})();
+</script>
+</body>
+</html>
